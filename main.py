@@ -15,7 +15,7 @@ if __name__ == "__main__":
                 group_name="customer"),
             SchemaMap(columns=[
                 Column("id", int),
-                SchemaAlias("firstName", "first_name", str),
+                SchemaAlias("first_name", "first_name", str),
                 SchemaAlias("lastName", "last_name", str),
                 Column("status", str),
                 Column("email", str),

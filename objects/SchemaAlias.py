@@ -12,7 +12,7 @@ Instead of having this be our JSON response:
     "customer_address_zip": 6789
 }
 
-We can utilize SchemaAliases and SchemaMaps to nest this for the sql-fusion dataclass compiler and JSON serializer to understand.
+We can utilize SchemaAliases and SchemaMaps to nest this for the sql-fusion dataclass compiler to understand.
 
 SchemaMap/SchemaAlias example:
 ------

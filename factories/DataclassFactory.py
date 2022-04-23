@@ -2,6 +2,8 @@
 This object converts an interpreted RootSchemaMap into a Python Dataclass file.
 """
 import json
+import os
+import shutil
 
 from objects.SchemaInterpreter import SchemaInterpreter
 from objects.SchemaMap import RootSchemaMap
@@ -34,19 +36,35 @@ class DataclassFactory:
                     self.dataclasses[col["name"]] = compiled_text
         print("---------------------")
         print("[*] Compilation complete.")
+        print("[-] Cleaning build directory...")
+
+        # try to clean the build folder,
+        try:
+            shutil.rmtree("build/")
+            os.mkdir("build")
+        except FileNotFoundError:
+            os.mkdir("build")
+
+        # iterate over the compiled dataclasses, export them
         for compiled_source in self.dataclasses:
-            print("[-] {0}]=-----------".format(compiled_source))
+            titled_source = compiled_source.title()
+            print("[-] {0}]=-----------".format(titled_source))
+            os.mkdir(os.path.join("build", titled_source))
+
+            with open(os.path.join("build", titled_source, "dataclass.py"), "w") as file:
+                file.write(self.dataclasses[compiled_source])
+
             print(self.dataclasses[compiled_source])
-        print("---------------------")
-        print("Would you like to save these files to 'build/' ?")
-        save_files = input("y/n> ")
+
 
 
     # Handle dataclass compilation
     def dataclass_compile(self, schema_map, dataclass_name):
         section = []
 
-        text = "@dataclass \n" \
+        text = "from dataclasses import dataclass\n" \
+               "\n" \
+               "@dataclass \n" \
                "class {0}:\n".format(dataclass_name)
 
         # just like in SchemaInterpreter, iterate over all the objects in this schema map.
@@ -57,6 +75,9 @@ class DataclassFactory:
                 for attribute in obj:
                     object_type = obj[attribute]["sql_fusion_type"]
                     if object_type == "schema_alias":
+                        if obj[attribute]["pretty_name"] == attribute:
+                            print("[!] warning: schema_alias not needed - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
+                                                                                   attribute))
                         print("[.] found schema_alias - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
                                                                                    attribute))
                         text += self.add_indent(1, "# Database Column: {0}".format(attribute))
