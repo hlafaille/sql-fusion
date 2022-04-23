@@ -18,7 +18,7 @@ class SchemaInterpreter:
 
     # interprets exact name columns (ex: database name is the same as this objects)
     def column_interpreter(self, column: Column):
-        return {"name": column.name, "datatype": column.python_datatype}
+        return {"name": column.name, "datatype": column.python_datatype.__name__, "sql_fusion_type": "column"}
 
     def root_schema_map_interpreter(self, root_schema_map):
         self.master[root_schema_map.root_name] = []
@@ -62,14 +62,14 @@ class SchemaInterpreter:
             elif type(column) == SchemaAlias:
                 section.append(self.schema_alias_interpreter(column))
 
-        testy = {named_schema_map.group_name: section}
+        testy = {"data": section, "sql_fusion_type": "named_schema_map", "name": named_schema_map.group_name}
         return testy
 
     # handles interpretation of schema aliases (ex: translates linear database columns to pretty key-value nested pairs)
     def schema_alias_interpreter(self, schema_alias: SchemaAlias):
         # returns dict
         return {
-            schema_alias.database_name: {"pretty_name": schema_alias.pretty_name, "datatype": schema_alias.datatype}}
+            schema_alias.database_name: {"pretty_name": schema_alias.pretty_name, "datatype": schema_alias.datatype.__name__, "sql_fusion_type": "schema_alias"}}
     
     def get_interpreted(self):
         return self.master
