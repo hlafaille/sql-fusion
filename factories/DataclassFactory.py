@@ -61,7 +61,7 @@ class DataclassFactory:
                 file.write(self.dataclasses[compiled_source])
 
         print("[.] sub dataclasses built, now compiling root schema map.")
-
+        print("---------------------")
         with open(os.path.join("build", "{0}.py".format(x)), "w") as file:
             temp = self.root_dataclass_compile(self.interpreted_schema.get_interpreted(), x)
             file.write(temp)
@@ -121,7 +121,7 @@ class DataclassFactory:
                             print("[!] warning: schema alias not needed - pretty: {0}, ugly: {1}".format(
                                 obj[attribute]["pretty_name"],
                                 attribute))
-                        print("[.] found schema alias - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
+                        print("[.]     found schema alias - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
                                                                                        attribute))
                         text += self.add_indent(1, "# Database Column: {0}".format(attribute))
                         text += self.add_indent(1, "{0}: {1}".format(obj[attribute]["pretty_name"],
@@ -130,7 +130,7 @@ class DataclassFactory:
             except TypeError:
                 # maybe it's a column?
                 if obj["sql_fusion_type"] == "column":
-                    print("[.] found column - {0}".format(obj["name"]))
+                    print("[.]     found column - {0}".format(obj["name"]))
                     text += self.add_indent(1, "{0}: {1}".format(obj["name"],
                                                                  obj["datatype"]))
 
