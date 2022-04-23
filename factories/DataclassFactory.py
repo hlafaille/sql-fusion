@@ -56,9 +56,9 @@ class DataclassFactory:
                     if object_type == "schema_alias":
                         print("[.] found schema_alias - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
                                                                                    attribute))
-                        text += self.add_indent(1, "{0}: {1}    #Database: {2}".format(obj[attribute]["pretty_name"],
-                                                                                       obj[attribute]["datatype"],
-                                                                                       attribute))
+                        text += self.add_indent(1, "# Database Column: {0}".format(attribute))
+                        text += self.add_indent(1, "{0}: {1}".format(obj[attribute]["pretty_name"],
+                                                                                       obj[attribute]["datatype"]))
             # if it's not a schema alias, it's gotta be something else...
             except TypeError:
                 # maybe it's a column?
