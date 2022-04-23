@@ -38,6 +38,9 @@ class SchemaInterpreter:
                 # iterate over the objects in the schema map
                 section.append(self.named_schema_map_interpreter(column))
 
+            # if this is an unknown type to the interpreter
+            else:
+                raise TypeError("Unsupported sql-fusion type {0}, please read the documentation".format(type(column)))
         if len(section) == 1:
             self.master_json.append(section[0])
         else:
