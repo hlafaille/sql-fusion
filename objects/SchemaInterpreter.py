@@ -12,7 +12,7 @@ class SchemaInterpreter:
 
         # how many kinds of dataclasses do we need to establish?
         self.dataclass_types = []
-
+        self.count = 0
         # entrypoint
         self.root_schema_map_interpreter(schema_map)
 
@@ -56,16 +56,13 @@ class SchemaInterpreter:
 
             # if this entry is a nested schema map (call schema map interpreter) (ex: customer data)
             elif type(column) == SchemaMap:
-                self.named_schema_map_interpreter(column)
+                print(column.columns[0].name)
+                section.append(self.named_schema_map_interpreter(column))
 
             # if this entry is a nested schema alias (call schema alias interpreter)
             elif type(column) == SchemaAlias:
                 section.append(self.schema_alias_interpreter(column))
 
-            # if this entry is a dictionary (used in a named SchemaMap)
-            elif type(column) == dict:
-                # iterate over the objects in the schema map
-                self.named_schema_map_interpreter(column)
         testy = {named_schema_map.group_name: section}
         return testy
 
