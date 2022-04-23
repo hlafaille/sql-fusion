@@ -1,0 +1,2 @@
+class ColumnExistsException(Exception):
+    pass
