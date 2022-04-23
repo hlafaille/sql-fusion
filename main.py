@@ -1,3 +1,5 @@
+import pprint
+
 from objects.SQLColumn import Column
 from objects.SchemaAlias import SchemaAlias
 from objects.SchemaInterpreter import SchemaInterpreter
@@ -16,5 +18,8 @@ if __name__ == "__main__":
 
     interpreter = SchemaInterpreter(schema)
 
+    pp = pprint.PrettyPrinter(indent=4)
     for x in interpreter.master_json:
-        print(x)
+        pp.pprint(x)
+    #print("----------------")
+    print(interpreter.master_json)
