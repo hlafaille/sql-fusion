@@ -43,6 +43,7 @@ class CommandInterpreter:
         if self.user_input == "help":
             print("(n)ew     - copies 'src/template/' to 'src', creating a new sql-fusion project.")
             print("(c)ompile - compiles the project in 'src', outputting it in 'build'.")
+            print("(o)pen    - lists the projects in 'src', if there's only one it will be automatically opened.")
             print("(e)xit    - exits the cli.")
 
         # exit procedure
