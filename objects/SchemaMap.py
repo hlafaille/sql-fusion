@@ -33,16 +33,15 @@ from exceptions import ColumnExistsException
 
 
 class SchemaMap:
-    def __init__(self, columns, group_name=""):
+    def __init__(self, columns, group_name):
+        self.group_name = group_name
+
         # where we actually store the SchemaMaps
         self.columns = []
 
         # if there was no group name passed
-        if group_name == "":
-            for col in columns:
-                self.add_column(col)
-        else:
-            self.add_schema_group(columns, group_name)
+        for col in columns:
+            self.add_column(col)
 
     def __iter__(self):
         return iter(self.columns)

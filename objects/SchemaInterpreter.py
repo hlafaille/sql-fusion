@@ -31,7 +31,7 @@ class SchemaInterpreter:
 
             # if this entry is a nested schema map (call schema map interpreter) (ex: customer data)
             elif type(column) == SchemaMap:
-                x = self.schema_map_interpreter(column)
+                x = self.named_schema_map_interpreter(column)
                 self.master_json[root_schema_map.root_name].append(x)
 
             # if this entry is a nested schema alias (call schema alias interpreter)
@@ -44,57 +44,19 @@ class SchemaInterpreter:
                     "Unsupported sql-fusion type {0} in RootSchemaMap. Possibly have RootSchemaMap and SchemaMap confused? Check out the documentation!".format(
                         type(column)))
 
-    # interprets schema maps, possible recursive function.
-    def schema_map_interpreter(self, schema_map):
-        section = []
-
-        # begin interpretation
-        for column in schema_map:
-            # if this entry in the schema map is a lone column (ex: primary key)
-            if type(column) == Column:
-                section.append(self.column_interpreter(column))
-
-            # if this entry is a nested schema map (call schema map interpreter) (ex: customer data)
-            elif type(column) == SchemaMap:
-                self.schema_map_interpreter(column)
-
-            # if this entry is a nested schema alias (call schema alias interpreter)
-            elif type(column) == SchemaAlias:
-                section.append(self.schema_alias_interpreter(column))
-
-            # if this entry is a dictionary (used in a named SchemaMap)
-            elif type(column) == dict:
-                # iterate over the objects in the schema map
-                x = self.named_schema_map_interpreter(column)
-                if "commission" in x.keys():
-                    print("in keys, should be in")
-                section.append(x)
-
-            # if this is an unknown type to the interpreter
-            else:
-                raise TypeError(
-                    "Unsupported sql-fusion type {0} with value '{1}', please read the documentation.".format(
-                        type(column), column))
-
-        if len(section) == 1:
-            return section[0]
-        else:
-            return section
-
     # handles a named schema map (dict)
-    def named_schema_map_interpreter(self, named_schema_map: dict):
+    def named_schema_map_interpreter(self, named_schema_map: SchemaMap):
         section = []
 
         # begin interpretation
-        for column in named_schema_map["columns"]:
-
+        for column in named_schema_map.columns:
             # if this entry in the schema map is a lone column (ex: primary key)
             if type(column) == Column:
                 section.append(self.column_interpreter(column))
 
             # if this entry is a nested schema map (call schema map interpreter) (ex: customer data)
             elif type(column) == SchemaMap:
-                self.schema_map_interpreter(column)
+                self.named_schema_map_interpreter(column)
 
             # if this entry is a nested schema alias (call schema alias interpreter)
             elif type(column) == SchemaAlias:
@@ -104,8 +66,7 @@ class SchemaInterpreter:
             elif type(column) == dict:
                 # iterate over the objects in the schema map
                 self.named_schema_map_interpreter(column)
-
-        testy = {named_schema_map["schema_group_name"]: section}
+        testy = {named_schema_map.group_name: section}
         return testy
 
     # handles interpretation of schema aliases (ex: translates linear database columns to pretty key-value nested pairs)
