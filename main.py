@@ -24,7 +24,7 @@ if __name__ == "__main__":
                 Column("email", str),
                 SchemaMap(columns=[
                     Column("sales", float),
-                    Column("purchasing", float)
+                    Column("purchasing", float),
                 ],
                     group_name="commission"),
             ],
