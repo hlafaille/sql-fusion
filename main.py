@@ -25,7 +25,7 @@ if __name__ == "__main__":
                     Column("sales", float),
                     Column("purchasing", float)
                 ],
-                    group_name="commission")
+                    group_name="commission"),
             ],
                 group_name="employee")
         ],
@@ -35,5 +35,5 @@ if __name__ == "__main__":
 
     pp = pprint.PrettyPrinter(indent=4)
     pp.pprint(interpreter.master_json)
-    # print("----------------")
-    # print(interpreter.master_json)
+    print("----------------")
+    print(interpreter.master_json)
