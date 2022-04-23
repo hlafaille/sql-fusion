@@ -1,5 +1,6 @@
 import pprint
 
+from factories.DataclassFactory import DataclassFactory
 from objects.SQLColumn import Column
 from objects.SchemaAlias import SchemaAlias
 from objects.SchemaInterpreter import SchemaInterpreter
@@ -31,9 +32,5 @@ if __name__ == "__main__":
         ],
         root_name="sales_order"
     )
-    interpreter = SchemaInterpreter(schema)
 
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(interpreter.master_json)
-    print("----------------")
-    print(interpreter.master_json)
+    dataclass_factory = DataclassFactory(schema)

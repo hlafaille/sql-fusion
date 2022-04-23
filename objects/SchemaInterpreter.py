@@ -8,7 +8,7 @@ from objects.SchemaAlias import SchemaAlias
 
 class SchemaInterpreter:
     def __init__(self, schema_map: RootSchemaMap):
-        self.master_json = {}
+        self.master = {}
 
         # how many kinds of dataclasses do we need to establish?
         self.dataclass_types = []
@@ -21,22 +21,22 @@ class SchemaInterpreter:
         return {"name": column.name, "datatype": column.python_datatype}
 
     def root_schema_map_interpreter(self, root_schema_map):
-        self.master_json[root_schema_map.root_name] = []
+        self.master[root_schema_map.root_name] = []
 
         # begin interpretation
         for column in root_schema_map:
             # if this entry in the schema map is a lone column (ex: primary key)
             if type(column) == Column:
-                self.master_json[root_schema_map.root_name].append(self.column_interpreter(column))
+                self.master[root_schema_map.root_name].append(self.column_interpreter(column))
 
             # if this entry is a nested schema map (call schema map interpreter) (ex: customer data)
             elif type(column) == SchemaMap:
                 x = self.named_schema_map_interpreter(column)
-                self.master_json[root_schema_map.root_name].append(x)
+                self.master[root_schema_map.root_name].append(x)
 
             # if this entry is a nested schema alias (call schema alias interpreter)
             elif type(column) == SchemaAlias:
-                self.master_json[root_schema_map.root_name].append(self.schema_alias_interpreter(column))
+                self.master[root_schema_map.root_name].append(self.schema_alias_interpreter(column))
 
             # if this is an unknown type to the interpreter
             else:
@@ -56,7 +56,6 @@ class SchemaInterpreter:
 
             # if this entry is a nested schema map (call schema map interpreter) (ex: customer data)
             elif type(column) == SchemaMap:
-                print(column.columns[0].name)
                 section.append(self.named_schema_map_interpreter(column))
 
             # if this entry is a nested schema alias (call schema alias interpreter)
@@ -71,3 +70,6 @@ class SchemaInterpreter:
         # returns dict
         return {
             schema_alias.database_name: {"pretty_name": schema_alias.pretty_name, "datatype": schema_alias.datatype}}
+    
+    def get_interpreted(self):
+        return self.master
