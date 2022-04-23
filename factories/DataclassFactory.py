@@ -4,6 +4,7 @@ This object converts an interpreted RootSchemaMap into a Python Dataclass file.
 import json
 import os
 import shutil
+import string
 import traceback
 
 from objects.SchemaInterpreter import SchemaInterpreter
@@ -21,20 +22,22 @@ class DataclassFactory:
         # iterate over the interpreted root schema map, establish what we're working with
         for x in self.interpreted_schema.get_interpreted():
             print("[.] root schema map is {0}.".format(x))
-            print("---------------------")
 
             # iterate over the named_schema_maps, those're going to be our data classes.
             for col in self.interpreted_schema.get_interpreted()[x]:
-                if col["sql_fusion_type"] == "named_schema_map":
-                    # establish some per-dataclass variables (ex: name)
-                    dataclass_name = col["name"].title()
+                try:
+                    if col["sql_fusion_type"] == "named_schema_map":
+                        # establish some per-dataclass variables (ex: name)
+                        dataclass_name = col["name"].title().title()
 
-                    print("[.] found nested named schema map in root, beginning compilation of {0}".format(dataclass_name))
-                    print("---------------------")
+                        print("---------------------")
+                        print("[.] found nested named schema map in root, beginning compilation of {0}".format(dataclass_name))
 
-                    # append the dataclasses to the dictionary
-                    compiled_text = self.dataclass_compile(col["data"], col["name"])
-                    self.dataclasses[col["name"]] = compiled_text
+                        # append the dataclasses to the dictionary
+                        compiled_text = self.dataclass_compile(col["data"], col["name"])
+                        self.dataclasses[col["name"]] = compiled_text
+                except KeyError:
+                    pass
         print("---------------------")
         print("[*] compilation of sub schema maps, complete.")
         print("[.] cleaning build directory...")
@@ -48,21 +51,18 @@ class DataclassFactory:
 
         # iterate over the compiled dataclasses, export them
         for compiled_source in self.dataclasses:
-            titled_source = compiled_source.title()
-            print("[.] building {0}...".format(titled_source))
-            os.mkdir(os.path.join("build", titled_source))
+            print("[.] building {0}...".format(compiled_source))
 
-            with open(os.path.join("build", titled_source, "{0}.py".format(titled_source)), "w") as file:
+            with open(os.path.join("build", "{0}.py".format(compiled_source)), "w") as file:
                 file.write(self.dataclasses[compiled_source])
 
         print("[.] sub dataclasses built, now compiling root schema map.")
 
-        os.mkdir(os.path.join("build", x.title()))
-        with open(os.path.join("build", x.title(), "{0}.py".format(x.title())), "w") as file:
+        with open(os.path.join("build", "{0}.py".format(x)), "w") as file:
             temp = self.root_dataclass_compile(self.interpreted_schema.get_interpreted(), x)
             file.write(temp)
         print("---------------------")
-        print("[*] compilation complete with {0} dataclasses. ".format(len(self.dataclasses)))
+        print("[*] compilation complete with {0} nested dataclasses. ".format(len(self.dataclasses)))
 
     # Handle root dataclass compilation (this wil reference nested dataclasses we've created).
     def root_dataclass_compile(self, root_schema_map, dataclass_name):
@@ -71,7 +71,7 @@ class DataclassFactory:
                "\n" \
                "\n" \
                "@dataclass\n" \
-               "class {0}:\n".format(str(dataclass_name).title())
+               "class {0}:\n".format(dataclass_name)
 
         # just like in SchemaInterpreter, iterate over all the objects in this schema map.
         for obj in root_schema_map[dataclass_name]:
@@ -80,14 +80,22 @@ class DataclassFactory:
                 if obj["sql_fusion_type"] == "column":
                     print("[.] found root schema map column - {0}".format(obj["name"]))
                     text += self.add_indent(1, "{0}: {1}".format(obj["name"], obj["datatype"]))
+                # what about a schema map?
                 elif obj["sql_fusion_type"] == "named_schema_map":
                     print("[.] found named schema map - {0}".format(obj["name"]))
+                    imports += "from {0} import {0}\n".format(obj["name"].title())
                     text += self.add_indent(1, "{0}: {1}".format(obj["name"], obj["name"].title()))
-            # if it's not a schema alias, it's gotta be something else...
-            except TypeError:
-                print(traceback.format_exc())
 
-        return text
+            # if it's not a schema map, it's gotta be something else...
+            except KeyError:
+                for database_name in obj:
+                    if obj[database_name]["sql_fusion_type"] == "schema_alias":
+                        print("[.] found root level schema alias - pretty: {0}, ugly: {1}".format(obj[database_name]["pretty_name"],
+                                                                                       database_name))
+                        text += self.add_indent(1, "{0}: {1}".format(obj[database_name]["pretty_name"],
+                                                                     obj[database_name]["datatype"]))
+
+        return imports + text
 
     # Handle dataclass compilation
     def dataclass_compile(self, schema_map, dataclass_name):
@@ -106,10 +114,10 @@ class DataclassFactory:
                     object_type = obj[attribute]["sql_fusion_type"]
                     if object_type == "schema_alias":
                         if obj[attribute]["pretty_name"] == attribute:
-                            print("[!] warning: schema_alias not needed - pretty: {0}, ugly: {1}".format(
+                            print("[!] warning: schema alias not needed - pretty: {0}, ugly: {1}".format(
                                 obj[attribute]["pretty_name"],
                                 attribute))
-                        print("[.] found schema_alias - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
+                        print("[.] found schema alias - pretty: {0}, ugly: {1}".format(obj[attribute]["pretty_name"],
                                                                                        attribute))
                         text += self.add_indent(1, "# Database Column: {0}".format(attribute))
                         text += self.add_indent(1, "{0}: {1}".format(obj[attribute]["pretty_name"],
@@ -126,7 +134,7 @@ class DataclassFactory:
                 else:
                     if obj["sql_fusion_type"] == "named_schema_map":
                         print(
-                            "[!] found nested named_schema_map during another schema_map compilation, appending - {0}".format(
+                            "[!] found nested named schema map during another schema map compilation, pausing and compiling first. - {0}".format(
                                 obj["name"]))
 
                         self.dataclasses[obj["name"].title()] = self.dataclass_compile(obj["data"], obj["name"])
