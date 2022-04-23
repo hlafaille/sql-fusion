@@ -1,6 +1,7 @@
 """
 This object converts an interpreted RootSchemaMap into a Python Dataclass file.
 """
+import json
 
 from objects.SchemaInterpreter import SchemaInterpreter
 from objects.SchemaMap import RootSchemaMap
@@ -31,8 +32,12 @@ class DataclassFactory:
                     # append the dataclasses to the dictionary
                     compiled_text = self.dataclass_compile(col["data"], col["name"])
                     self.dataclasses[col["name"]] = compiled_text
-                    print("---------------------")
-                    print(compiled_text)
+        print("---------------------")
+        print("[*] Compilation complete.")
+        for compiled_source in self.dataclasses:
+            print("[-] {0}]=-----------".format(compiled_source))
+            print(self.dataclasses[compiled_source])
+
 
     # Handle dataclass compilation
     def dataclass_compile(self, schema_map, dataclass_name):
@@ -56,7 +61,6 @@ class DataclassFactory:
                                                                                        attribute))
             # if it's not a schema alias, it's gotta be something else...
             except TypeError:
-
                 # maybe it's a column?
                 if obj["sql_fusion_type"] == "column":
                     print("[.] found column - {0}".format(obj["name"]))
@@ -68,6 +72,7 @@ class DataclassFactory:
                     if obj["sql_fusion_type"] == "named_schema_map":
                         print("[!] found nested named_schema_map during another schema_map compilation, appending - {0}".format(obj["name"]))
 
+                        self.dataclasses[obj["name"].title()] = self.dataclass_compile(obj["data"], obj["name"])
         return text
 
     # quick function to handle indents
