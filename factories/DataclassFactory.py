@@ -37,6 +37,9 @@ class DataclassFactory:
         for compiled_source in self.dataclasses:
             print("[-] {0}]=-----------".format(compiled_source))
             print(self.dataclasses[compiled_source])
+        print("---------------------")
+        print("Would you like to save these files to 'build/' ?")
+        save_files = input("y/n> ")
 
 
     # Handle dataclass compilation

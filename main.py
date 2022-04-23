@@ -1,9 +1,6 @@
-import pprint
-
 from factories.DataclassFactory import DataclassFactory
 from objects.SQLColumn import Column
 from objects.SchemaAlias import SchemaAlias
-from objects.SchemaInterpreter import SchemaInterpreter
 from objects.SchemaMap import SchemaMap, RootSchemaMap
 
 if __name__ == "__main__":
