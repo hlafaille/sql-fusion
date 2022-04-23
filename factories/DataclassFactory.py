@@ -13,7 +13,7 @@ from objects.SchemaMap import RootSchemaMap
 
 
 class DataclassFactory:
-    def __init__(self, root_schema_map: RootSchemaMap):
+    def __init__(self, root_schema_map: RootSchemaMap, project_name):
         # variables
         self.dataclasses = {}
 
@@ -48,21 +48,21 @@ class DataclassFactory:
 
         # try to clean the build folder,
         try:
-            shutil.rmtree("build/")
-            os.mkdir("build")
+            shutil.rmtree("build/{0}".format(project_name))
+            os.mkdir("build/{0}".format(project_name))
         except FileNotFoundError:
-            os.mkdir("build")
+            os.mkdir("build/{0}".format(project_name))
 
         # iterate over the compiled dataclasses, export them
         for compiled_source in self.dataclasses:
             print("[.] building {0}...".format(compiled_source))
 
-            with open(os.path.join("build", "{0}.py".format(compiled_source)), "w") as file:
+            with open(os.path.join("build", project_name, "{0}.py".format(compiled_source)), "w") as file:
                 file.write(self.dataclasses[compiled_source])
 
         print("[.] sub dataclasses built, now compiling root schema map.")
         print("---------------------")
-        with open(os.path.join("build", "{0}.py".format(x)), "w") as file:
+        with open(os.path.join("build", project_name, "{0}.py".format(x)), "w") as file:
             temp = self.root_dataclass_compile(self.interpreted_schema.get_interpreted(), x)
             file.write(temp)
         print("---------------------")
