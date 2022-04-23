@@ -14,4 +14,3 @@ if __name__ == "__main__":
          )
          ]
     )
-    print("ass pp {0}".format(schema.columns))
