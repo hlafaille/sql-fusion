@@ -17,15 +17,15 @@ We can utilize SchemaAliases and SchemaMaps to nest this for the sql-fusion data
 SchemaMap/SchemaAlias example:
 ------
     schema = SchemaMap(
-        ["isn",
+        [Column("isn", int),
          SchemaMap(columns=[
-             SchemaAlias("customer_name", "name"),
-             SchemaAlias("customer_address_line1", "line1"),
-             SchemaAlias("customer_address_line2", "line2"),
-             SchemaAlias("customer_address_zip", "zip"),
-         ],
-         group_name="customer")]
+             SchemaAlias("customer_name", "name", str),
+             SchemaAlias("customer_address_line1", "line1", str),
+             SchemaAlias("customer_address_line2", "line2", str),
+             SchemaAlias("customer_address_zip", "zip", int)],
+             group_name="customer")]
     )
+
 
 Using a SchemaMap in combination with SchemaAliases will bind our linear database columns into a tree like structure,
 absolutely perfect... even though not many people will see it. It's the thought that counts, right?
@@ -34,6 +34,7 @@ absolutely perfect... even though not many people will see it. It's the thought 
 
 
 class SchemaAlias:
-    def __init__(self, database_name, pretty_name):
+    def __init__(self, database_name, pretty_name, datatype):
         self.pretty_name = pretty_name
         self.database_name = database_name
+        self.datatype = datatype

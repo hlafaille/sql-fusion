@@ -40,6 +40,9 @@ class SchemaMap:
         else:
             self.add_schema_group(columns, group_name)
 
+    def __iter__(self):
+        return iter(self.columns)
+
     # adds a column to the schema map
     def add_column(self, column_name):
         # test if a group_name was passed
