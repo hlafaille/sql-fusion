@@ -142,7 +142,6 @@ class DataclassFactory:
                                 obj["name"]))
                         text += self.add_indent(1, "{0}: {0}".format(obj["name"]))
                         self.dataclasses[obj["name"]] = self.dataclass_compile(obj["data"], obj["name"])
-                        print(self.dataclasses)
         return text
 
     # quick function to handle indents

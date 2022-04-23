@@ -33,7 +33,16 @@ if __name__ == "__main__":
                 SchemaAlias(database_name="billing_city", pretty_name="city", datatype=str),
                 SchemaAlias(database_name="billing_state", pretty_name="state", datatype=str),
             ], group_name="CustomerAddress")
-        ], group_name="Customer")
+        ], group_name="Customer"),
+        Column("customer_po", int),
+        Column("items", dict),
+        Column("notes", dict),
+        Column("previous_document", int),
+        SchemaMap(columns=[
+            Column("shipping_account", str),
+            Column("shipping_cost", float),
+            Column("shipping_method", str)
+        ], group_name="ShippingInformation")
 
     ],
         root_name="SalesInvoice")
