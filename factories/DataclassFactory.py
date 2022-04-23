@@ -7,6 +7,7 @@ import shutil
 import string
 import traceback
 
+from exceptions import DuplicateDataclassException
 from objects.SchemaInterpreter import SchemaInterpreter
 from objects.SchemaMap import RootSchemaMap
 
@@ -28,10 +29,13 @@ class DataclassFactory:
                 try:
                     if col["sql_fusion_type"] == "named_schema_map":
                         # establish some per-dataclass variables (ex: name)
-                        dataclass_name = col["name"].title().title()
+                        dataclass_name = col["name"]
 
                         print("---------------------")
-                        print("[.] found nested named schema map in root, beginning compilation of {0}".format(dataclass_name))
+                        if dataclass_name not in self.dataclasses.keys():
+                            print("[.] found nested named schema map in root, beginning compilation of {0}".format(dataclass_name))
+                        else:
+                            raise DuplicateDataclassException("SchemaMap in root '{0}' has duplicate".format(dataclass_name))
 
                         # append the dataclasses to the dictionary
                         compiled_text = self.dataclass_compile(col["data"], col["name"])
@@ -80,11 +84,11 @@ class DataclassFactory:
                 if obj["sql_fusion_type"] == "column":
                     print("[.] found root schema map column - {0}".format(obj["name"]))
                     text += self.add_indent(1, "{0}: {1}".format(obj["name"], obj["datatype"]))
+
                 # what about a schema map?
                 elif obj["sql_fusion_type"] == "named_schema_map":
                     print("[.] found named schema map - {0}".format(obj["name"]))
-                    imports += "from {0} import {0}\n".format(obj["name"].title())
-                    text += self.add_indent(1, "{0}: {1}".format(obj["name"], obj["name"].title()))
+                    text += self.add_indent(1, "{0}: {1}".format(obj["name"], obj["name"]))
 
             # if it's not a schema map, it's gotta be something else...
             except KeyError:
@@ -103,7 +107,7 @@ class DataclassFactory:
                "\n" \
                "\n" \
                "@dataclass\n" \
-               "class {0}:\n".format(str(dataclass_name).title())
+               "class {0}:\n".format(str(dataclass_name))
 
         # just like in SchemaInterpreter, iterate over all the objects in this schema map.
         for obj in schema_map:
@@ -136,8 +140,9 @@ class DataclassFactory:
                         print(
                             "[!] found nested named schema map during another schema map compilation, pausing and compiling first. - {0}".format(
                                 obj["name"]))
-
-                        self.dataclasses[obj["name"].title()] = self.dataclass_compile(obj["data"], obj["name"])
+                        text += self.add_indent(1, "{0}: {0}".format(obj["name"]))
+                        self.dataclasses[obj["name"]] = self.dataclass_compile(obj["data"], obj["name"])
+                        print(self.dataclasses)
         return text
 
     # quick function to handle indents
