@@ -42,7 +42,6 @@ class SchemaMap:
 
     # adds a column to the schema map
     def add_column(self, column_name):
-        print("adding column {0}".format(column_name))
         # test if a group_name was passed
         self.columns.append(column_name)
 
@@ -55,7 +54,6 @@ class SchemaMap:
             #raise ColumnExistsException("Column '{0}' already exists in the schema map. ".format(column_name))
 
     def add_schema_group(self, columns, group_name):
-        print("adding schema group {0} {1}".format(columns, group_name))
         temp_group = {"schema_group_name": group_name,
                       "columns": columns}
         self.columns.append(temp_group)
