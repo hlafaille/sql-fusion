@@ -13,6 +13,7 @@ class SchemaInterpreter:
         # how many kinds of dataclasses do we need to establish?
         self.dataclass_types = []
         self.count = 0
+
         # entrypoint
         self.root_schema_map_interpreter(schema_map)
 

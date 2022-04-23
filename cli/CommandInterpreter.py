@@ -52,13 +52,16 @@ class CommandInterpreter:
 
         # compilation procedure
         elif self.user_input == "compile" or self.user_input == "c":
-            print("are you sure you wish to compile? this will erase anything in the 'build' directory!")
-            if self.get_confirmation():
-                dataclass = DataclassFactory(self.current_project.schema, self.current_project_name)
+            if self.current_project:
+                print("are you sure you wish to compile? this will erase everything in the projects build directory!")
+                if self.get_confirmation():
+                    dataclass = DataclassFactory(self.current_project.schema, self.current_project_name)
+            else:
+                print("no project selected")
 
         # new procedure
         elif self.user_input == "new" or self.user_input == "n":
-            print("are you sure you wish to create a new project? this will erase anything in the 'build' and 'src' directories!")
+            print("are you sure you wish to create a new project? this will erase anything in the projects 'build' and 'src' directories!")
             if self.get_confirmation():
                 print("what is this projects name?")
                 project_name = input("> ").replace("-", "_").replace(" ", "_")
