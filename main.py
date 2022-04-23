@@ -3,10 +3,10 @@ import pprint
 from objects.SQLColumn import Column
 from objects.SchemaAlias import SchemaAlias
 from objects.SchemaInterpreter import SchemaInterpreter
-from objects.SchemaMap import SchemaMap
+from objects.SchemaMap import SchemaMap, RootSchemaMap
 
 if __name__ == "__main__":
-    schema = SchemaMap(
+    schema = RootSchemaMap(
         [
             Column("isn", int),
             SchemaMap(columns=[
@@ -19,15 +19,21 @@ if __name__ == "__main__":
                 Column("id", int),
                 SchemaAlias("first_name", "firstName", str),
                 SchemaAlias("last_name", "lastName", str),
-                Column("status", str)
+                Column("status", str),
+                Column("email", str),
+                SchemaMap(columns=[
+                    Column("sales", float),
+                    Column("purchasing", float)
+                ],
+                    group_name="commission")
             ],
                 group_name="employee")
-        ])
-
+        ],
+        root_name="sales_order"
+    )
     interpreter = SchemaInterpreter(schema)
 
     pp = pprint.PrettyPrinter(indent=4)
-    for x in interpreter.master_json:
-        pp.pprint(x)
+    pp.pprint(interpreter.master_json)
     # print("----------------")
-    print(interpreter.master_json)
+    # print(interpreter.master_json)

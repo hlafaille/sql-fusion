@@ -17,14 +17,22 @@ We can utilize SchemaAliases and SchemaMaps to nest this for the sql-fusion data
 SchemaMap/SchemaAlias example:
 ------
     schema = SchemaMap(
-        [Column("isn", int),
-         SchemaMap(columns=[
-             SchemaAlias("customer_name", "name", str),
-             SchemaAlias("customer_address_line1", "line1", str),
-             SchemaAlias("customer_address_line2", "line2", str),
-             SchemaAlias("customer_address_zip", "zip", int)],
-             group_name="customer")]
-    )
+        [
+            Column("isn", int),
+            SchemaMap(columns=[
+                SchemaAlias("customer_name", "name", str),
+                SchemaAlias("customer_address_line1", "line1", str),
+                SchemaAlias("customer_address_line2", "line2", str),
+                SchemaAlias("customer_address_zip", "zip", int)],
+                group_name="customer"),
+            SchemaMap(columns=[
+                Column("id", int),
+                SchemaAlias("first_name", "firstName", str),
+                SchemaAlias("last_name", "lastName", str),
+                Column("status", str)
+            ],
+                group_name="employee")
+        ])
 
 
 Using a SchemaMap in combination with SchemaAliases will bind our linear database columns into a tree like structure,
