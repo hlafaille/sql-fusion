@@ -32,7 +32,7 @@ class JSONFactory:
 
             elif type(obj) == SchemaMap:
                 print("[.] found schema map, entering tree - {0}".format(obj.group_name))
-                self.columns[self.project_name].append(self.iterate_schema_map(obj))
+                temp[obj.group_name] = self.iterate_schema_map(obj)
 
             elif type(obj) == SchemaAlias:
                 print("[.] found schema alias - {0}".format(obj.database_name))
@@ -42,21 +42,21 @@ class JSONFactory:
 
     # iterate over the schema map
     def iterate_schema_map(self, schema_map):
-        temp = {schema_map.group_name: {}}
+        temp = {}
 
         print("---------------------")
         print("[.] beginning json compilation")
         for obj in schema_map:
             if type(obj) == Column:
                 print("[.] found column - {0}".format(obj.name))
-                temp[schema_map.group_name][obj.name] = str(obj.python_datatype.__name__)
+                temp[obj.name] = str(obj.python_datatype.__name__)
 
             elif type(obj) == SchemaMap:
                 print("[.] found schema map, entering tree - {0}".format(obj.group_name))
-                temp[schema_map.group_name][obj.group_name] = self.iterate_schema_map(obj)
+                temp[obj.group_name] = (self.iterate_schema_map(obj))
 
             elif type(obj) == SchemaAlias:
                 print("[.] found schema alias - {0}".format(obj.database_name))
-                temp[schema_map.group_name][obj.pretty_name] = str(obj.datatype.__name__)
+                temp[obj.pretty_name] = str(obj.datatype.__name__)
 
         return temp
