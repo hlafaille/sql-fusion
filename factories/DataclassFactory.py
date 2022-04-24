@@ -5,6 +5,7 @@ import json
 import os
 import shutil
 import string
+import sys
 import traceback
 
 from exceptions import DuplicateDataclassException
@@ -132,6 +133,69 @@ class DataclassFactory:
 
         return imports + text
 
+    # Handles generating an accompanying Factory object
+    def generate_factory(self, schema_map, dataclass_name):
+        # Establish the function from_database with required arg database_return
+        arguments = []
+
+        text = "\n"
+        header = self.add_indent(1, "def from_database(self, ", newline=False)
+        return_statement = self.add_indent(2, "return {0}(".format(dataclass_name), newline=False)
+
+        # begin assembling the text for creating the dataclass
+        for obj in schema_map:
+            for attribute in obj:
+                # if this object is a schema alias
+                try:
+                    if obj[attribute]["sql_fusion_type"] == "schema_alias":
+                        arguments.append({"argument": obj[attribute]["pretty_name"], "type": "single"})
+                except TypeError:
+                    pass
+            try:
+                # if this object is a column
+                if obj["sql_fusion_type"] == "column" and obj["name"] not in arguments:
+                    arguments.append({"argument": obj["name"], "type": "single"})
+
+                # if this object is a named schema map (aka dataclass)
+                elif obj["sql_fusion_type"] == "named_schema_map":
+                    arguments.append({"argument": obj["name"], "type": "class"})
+
+            except KeyError:
+                traceback.format_exc()
+
+        # iterate over the assembled arguments, append it to the function header and return statements
+        for arg in range(len(arguments)):
+
+            print(arguments[arg])
+
+            # if this is the last argument
+            if arg == len(arguments) - 1:
+                #print(arguments[arg])
+                if arguments[arg]["type"] == "single":
+                    header += "{0}):\n".format(arguments[arg]["argument"])
+                    return_statement += "{0}={0})".format(arguments[arg]["argument"])
+                elif arguments[arg]["type"] == "class":
+                    header += "{0}: {1}):\n".format(arguments[arg]["argument"].lower(), arguments[arg]["argument"])
+                    return_statement += "{0}={0})".format(arguments[arg]["argument"].lower())
+                    print("adding argument from -1 {0}".format(arguments[arg]["argument"]))
+
+            # if this is a middle or first argument
+            else:
+                if arguments[arg]["type"] == "single":
+                    header += "{0}, ".format(arguments[arg]["argument"])
+                    return_statement += "{0}={0}, ".format(arguments[arg]["argument"])
+                elif arguments[arg]["type"] == "class":
+                    header += "{0}: {1}, ".format(arguments[arg]["argument"].lower(), arguments[arg]["argument"])
+                    return_statement += "{0}={0}, ".format(arguments[arg]["argument"].lower())
+                    print("adding argument else {0}".format(arguments[arg]["argument"]))
+        print(arguments)
+        # append function header and return statement to text
+        text += header
+        text += return_statement
+        #text += self.add_indent(2, "return {0}()".format(dataclass_name))
+
+        return text
+
     # Handle dataclass compilation
     def dataclass_compile(self, schema_map, dataclass_name):
         imports = '"""\nsql-fusion compiled nested dataclass {0}\nThis class is a child class of {1}\n"""\n'.format(
@@ -141,8 +205,6 @@ class DataclassFactory:
                "\n" \
                "@dataclass\n" \
                "class {0}:\n".format(str(dataclass_name))
-
-        from_database_function = self.add_indent(1, "def from_database(self):\n")
 
         # just like in SchemaInterpreter, iterate over all the objects in this schema map.
         for obj in schema_map:
@@ -179,13 +241,18 @@ class DataclassFactory:
                                 obj["name"]))
 
                         imports += "from {0} import {0}\n".format(obj["name"])
-                        text += self.add_indent(1, "{0}: {0}".format(obj["name"]))
+                        text += self.add_indent(1, "{0}: {1}".format(obj["name"].lower(), obj["name"]))
                         self.dataclasses[obj["name"]] = self.dataclass_compile(obj["data"], obj["name"])
-        return imports + text
+
+        return imports + text + self.generate_factory(schema_map, dataclass_name)
 
     # quick function to handle indents
-    def add_indent(self, tabs, text):
+    def add_indent(self, tabs, text, newline=True):
         indent = ""
         for x in range(tabs * 4):
             indent += " "
-        return indent + text + "\n"
+
+        if newline:
+            return indent + text + "\n"
+        else:
+            return indent + text
