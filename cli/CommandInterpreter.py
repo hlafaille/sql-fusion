@@ -4,6 +4,7 @@ import shutil
 import sys
 
 from factories.DataclassFactory import DataclassFactory
+from factories.JSONFactory import JSONFactory
 from factories.SQLFactory import SQLFactory
 
 
@@ -59,6 +60,7 @@ class CommandInterpreter:
                 if self.get_confirmation():
                     dataclass = DataclassFactory(self.current_project.schema, self.current_project_name)
                     sql_factory = SQLFactory(self.current_project.schema, self.current_project_name)
+                    json_factory = JSONFactory(self.current_project.schema, self.current_project_name)
             else:
                 print("no project selected")
 
