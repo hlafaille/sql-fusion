@@ -4,6 +4,8 @@ import shutil
 import sys
 
 from factories.DataclassFactory import DataclassFactory
+from factories.SQLFactory import SQLFactory
+
 
 class CommandInterpreter:
     def __init__(self):
@@ -56,6 +58,7 @@ class CommandInterpreter:
                 print("are you sure you wish to compile? this will erase everything in the projects build directory!")
                 if self.get_confirmation():
                     dataclass = DataclassFactory(self.current_project.schema, self.current_project_name)
+                    sql_factory = SQLFactory(self.current_project.schema, self.current_project_name)
             else:
                 print("no project selected")
 
