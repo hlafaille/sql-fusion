@@ -78,9 +78,9 @@ class SQLFactory:
         for col in range(len(self.columns)):
             # if this is the last column
             if col == len(self.columns) - 1:
-                update_base += "{0}=(%({0}s)) ".format(self.columns[col])
+                update_base += "{0}=(%({0})s) ".format(self.columns[col])
             else:
-                update_base += "{0}=(%({0}s)), ".format(self.columns[col])
+                update_base += "{0}=(%({0})s), ".format(self.columns[col])
 
         update_final = update_base
 
