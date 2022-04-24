@@ -108,7 +108,7 @@ class DataclassFactory:
 
                     if temp not in text:
                         print("[.] found named schema map - {0}".format(obj["name"]))
-                        text += self.add_indent(1, "{0}: {0}".format(obj["name"]))
+                        text += self.add_indent(1, "{0}: {1}".format(obj["name"].lower(), obj["name"]))
                         imports += "from {0} import {0}\n".format(obj["name"])
                     else:
                         print("[!] duplicate named schema map, ignoring - {0}".format(obj["name"]))
@@ -166,8 +166,6 @@ class DataclassFactory:
         # iterate over the assembled arguments, append it to the function header and return statements
         for arg in range(len(arguments)):
 
-            print(arguments[arg])
-
             # if this is the last argument
             if arg == len(arguments) - 1:
                 #print(arguments[arg])
@@ -177,7 +175,6 @@ class DataclassFactory:
                 elif arguments[arg]["type"] == "class":
                     header += "{0}: {1}):\n".format(arguments[arg]["argument"].lower(), arguments[arg]["argument"])
                     return_statement += "{0}={0})".format(arguments[arg]["argument"].lower())
-                    print("adding argument from -1 {0}".format(arguments[arg]["argument"]))
 
             # if this is a middle or first argument
             else:
@@ -187,12 +184,10 @@ class DataclassFactory:
                 elif arguments[arg]["type"] == "class":
                     header += "{0}: {1}, ".format(arguments[arg]["argument"].lower(), arguments[arg]["argument"])
                     return_statement += "{0}={0}, ".format(arguments[arg]["argument"].lower())
-                    print("adding argument else {0}".format(arguments[arg]["argument"]))
-        print(arguments)
+
         # append function header and return statement to text
         text += header
         text += return_statement
-        #text += self.add_indent(2, "return {0}()".format(dataclass_name))
 
         return text
 
