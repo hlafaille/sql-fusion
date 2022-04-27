@@ -16,4 +16,10 @@ class SQLFusionPlugin:
     plugin_configuration = PluginConfiguration()
 
     def __init__(self, plugin_registry: PluginRegistry):
-        self.plugin_registry = plugin_registry
+        # register ourselves with the plugin registry. will be used as primary communication between CLI and plugins
+        plugin_registry.register_plugin(self)
+
+    # used for loading into the plugin registry, finding out which classes are plugins and which arent
+    @classmethod
+    def get_subclass_name(cls):
+        return cls.__name__

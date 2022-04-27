@@ -1,11 +1,14 @@
 import importlib
+import inspect
 import os
+import pyclbr
 import shutil
 import sys
 
 from factories.DataclassFactory import DataclassFactory
 from factories.JSONFactory import JSONFactory
 from factories.SQLFactory import SQLFactory
+from plugin_api.PluginRegistry import PluginRegistry
 
 
 class CommandInterpreter:
@@ -13,17 +16,13 @@ class CommandInterpreter:
         self.user_input = None
         self.current_project = None
         self.current_project_name = ""
-
+        self.plugin_registry = PluginRegistry()
         self.header()
         self.get_input()
 
     def header(self):
         os.system('cls' if os.name == 'nt' else 'clear')
-        print("███████  ██████  ██            ███████ ██    ██ ███████ ██  ██████  ███    ██      ██████ ██      ██ ")
-        print("██      ██    ██ ██            ██      ██    ██ ██      ██ ██    ██ ████   ██     ██      ██      ██ ")
-        print("███████ ██    ██ ██      █████ █████   ██    ██ ███████ ██ ██    ██ ██ ██  ██     ██      ██      ██ ")
-        print("     ██ ██ ▄▄ ██ ██            ██      ██    ██      ██ ██ ██    ██ ██  ██ ██     ██      ██      ██ ")
-        print("███████  ██████  ███████       ██       ██████  ███████ ██  ██████  ██   ████      ██████ ███████ ██ ")
+        print("sql-fusion cli")
 
         if self.current_project:
             print("current project: {0}".format(self.current_project_name))
@@ -121,6 +120,39 @@ class CommandInterpreter:
 
             self.header()
 
+        elif self.user_input == "plugins" or self.user_input == "p":
+            print("looking for plugins...")
+
+            # get a list of plugins from the plugin directory
+            plugin_directory = next(os.walk('plugins/'))[2]
+
+            # try and remove __pycache__
+            try:
+                plugin_directory.remove("__pycache__")
+            except ValueError:
+                pass
+
+            # iterate over the plugins and load them into the PluginRegistry
+            for plugin in plugin_directory:
+                temp_plugin = importlib.import_module(".PythonCompiler", package="plugins".format(plugin))
+                #temp_plugin.__package__
+                test = pyclbr.readmodule_ex("plugins.PythonCompiler").
+
+                print(test)
+                #print(inspect.getmembers(sys.modules[temp_plugin.__module__], inspect.isclass))
+#                print(temp_plugin.PythonCompiler.get_sublcass_name())
+                #self.plugin_registry.register_plugin(temp_plugin)
+
+            '''if not len(directories) == 1:
+                print("select project to open")
+                for x in range(len(directories)):
+                    print("{0}) {1}".format(x, directories[x]))
+
+                project = int(input("{0}-{1}> ".format(0, len(directories) - 1)))
+
+                self.current_project = importlib.import_module(".schema_map",
+                                                               package="src.{0}".format(directories[project]))
+                self.current_project_name = directories[project]'''
         else:
             print("unknown command, type help for a list of commands.")
         self.get_input()

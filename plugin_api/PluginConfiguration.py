@@ -8,8 +8,9 @@ class PluginConfiguration:
     def __init__(self,
                  plugin_name="My sql-fusion Plugin",
                  plugin_version="0.1.0",
-                 plugin_short_description="My very cool sql-fusion plugin!"):
+                 plugin_short_description="My very cool sql-fusion plugin!",
+                 author="sql-fusion"):
         self.plugin_name = plugin_name
         self.plugin_version = plugin_version
         self.plugin_short_description = plugin_short_description
-
+        self.author = author
