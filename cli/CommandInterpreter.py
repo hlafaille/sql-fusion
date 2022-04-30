@@ -72,37 +72,37 @@ class CommandInterpreter:
         # new procedure
         elif self.user_input == "new" or self.user_input == "n":
             print(
-                "are you sure you wish to create a new project? this will erase anything in the projects 'build' and 'src' directories!")
+                "are you sure you wish to create a new project? this will erase anything in the projects 'build' and 'src1' directories!")
             if self.get_confirmation():
                 print("what is this projects name?")
                 project_name = input("> ").replace("-", "_").replace(" ", "_")
 
                 if not project_name == "":
-                    dir_list = ["src", "build"]
+                    dir_list = ["src1", "build"]
 
-                    # create build and src directories
+                    # create build and src1 directories
                     for directory in dir_list:
                         try:
                             os.mkdir(directory)
                         except FileExistsError:
                             pass
 
-                    # create build/project and src/project directories
+                    # create build/project and src1/project directories
                     for directory in dir_list:
                         try:
                             os.mkdir(os.path.join(directory, project_name))
                         except FileExistsError:
                             pass
 
-                    # copy the template schema map to src
+                    # copy the template schema map to src1
                     shutil.copy(os.path.join("template", "schema_map_template.py"),
-                                os.path.join("src", project_name, "schema_map.py"))
+                                os.path.join("src1", project_name, "schema_map.py"))
 
                     print("schema map created in 'src/{0}', check it out!".format(project_name))
 
                     # import the module, use it for project management
                     self.current_project = importlib.import_module(".schema_map",
-                                                                   package="src.{0}".format(project_name))
+                                                                   package="src1.{0}".format(project_name))
                     self.current_project_name = project_name
 
                     self.header()
@@ -120,12 +120,12 @@ class CommandInterpreter:
                 project = int(input("{0}-{1}> ".format(0, len(directories) - 1)))
 
                 self.current_project = importlib.import_module(".schema_map",
-                                                               package="src.{0}".format(directories[project]))
+                                                               package="src1.{0}".format(directories[project]))
                 self.current_project_name = directories[project]
             else:
                 for x in range(len(directories)):
                     self.current_project = importlib.import_module(".schema_map",
-                                                                   package="src.{0}".format(directories[x]))
+                                                                   package="src1.{0}".format(directories[x]))
                     self.current_project_name = directories[x]
 
             self.header()

@@ -34,4 +34,4 @@ class Plugin(SQLFusionPlugin):
             command_table.add_row(
                 [command.command, command.plugin.plugin_configuration.plugin_name, command.description])
 
-        self.log(command_table)
+        self.log_no_prefix(command_table)

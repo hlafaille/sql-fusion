@@ -22,8 +22,12 @@ class Plugin(SQLFusionPlugin):
         # we can now call super to register ourselves with the plugin registry
         super(Plugin, self).__init__()
 
-        # register some commands
-        self.register_command("compile", self.compile, "Compiles a given Root Schema Map to build files.")
+        # register command (we can't just call SQLFusionPlugin's call_compile() function because it doesn't take any args)
+        self.register_command("compile", self.bootstrap_compilation, "Compiles a given Root Schema Map to build files.")
 
-    def compile(self, args):
-        print("bam! compiled. :)")
+    # begin bootstrapping the compilation process
+    def bootstrap_compilation(self, args):
+        if self.get_root_schema_map():
+            self.call_compilation()
+        else:
+            self.log_critical("No project is selected!")

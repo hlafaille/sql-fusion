@@ -35,4 +35,4 @@ class Plugin(SQLFusionPlugin):
                                   plugin.plugin_configuration.plugin_version,
                                   plugin.plugin_configuration.author,
                                   plugin.plugin_configuration.plugin_short_description])
-        self.log(plugin_table)
+        self.log_no_prefix(plugin_table)
