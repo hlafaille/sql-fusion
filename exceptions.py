@@ -3,3 +3,6 @@ class ColumnExistsException(Exception):
 
 class DuplicateDataclassException(Exception):
     pass
+
+class CommandNotFoundException(Exception):
+    pass

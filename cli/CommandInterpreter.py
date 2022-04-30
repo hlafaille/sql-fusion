@@ -5,10 +5,13 @@ import pyclbr
 import shutil
 import sys
 
+from prettytable import PrettyTable
+
 from factories.DataclassFactory import DataclassFactory
 from factories.JSONFactory import JSONFactory
 from factories.SQLFactory import SQLFactory
-from plugin_api.PluginRegistry import PluginRegistry
+from plugin_api import SQLFusionPlugin
+from plugin_api.SQLFusionPlugin import plugin_registry
 
 
 class CommandInterpreter:
@@ -16,7 +19,6 @@ class CommandInterpreter:
         self.user_input = None
         self.current_project = None
         self.current_project_name = ""
-        self.plugin_registry = PluginRegistry()
         self.header()
         self.get_input()
 
@@ -43,10 +45,14 @@ class CommandInterpreter:
     def interpret_input(self):
         #  help screen
         if self.user_input == "help":
-            print("(n)ew     - copies 'src/template/' to 'src', creating a new sql-fusion project.")
-            print("(c)ompile - compiles the project in 'src', outputting it in 'build'.")
-            print("(o)pen    - lists the projects in 'src', if there's only one it will be automatically opened.")
-            print("(e)xit    - exits the cli.")
+            # show a table (thanks prettytable) of all commands
+            command_table = PrettyTable()
+            command_table.field_names = ["Command", "Plugin", "Description"]
+
+            for command in plugin_registry.get_commands():
+                command_table.add_row([command.command, command.plugin.plugin_configuration.plugin_name, command.description])
+
+            print(command_table)
 
         # exit procedure
         elif self.user_input == "exit" or self.user_input == "e":
@@ -65,7 +71,8 @@ class CommandInterpreter:
 
         # new procedure
         elif self.user_input == "new" or self.user_input == "n":
-            print("are you sure you wish to create a new project? this will erase anything in the projects 'build' and 'src' directories!")
+            print(
+                "are you sure you wish to create a new project? this will erase anything in the projects 'build' and 'src' directories!")
             if self.get_confirmation():
                 print("what is this projects name?")
                 project_name = input("> ").replace("-", "_").replace(" ", "_")
@@ -94,7 +101,8 @@ class CommandInterpreter:
                     print("schema map created in 'src/{0}', check it out!".format(project_name))
 
                     # import the module, use it for project management
-                    self.current_project = importlib.import_module(".schema_map", package="src.{0}".format(project_name))
+                    self.current_project = importlib.import_module(".schema_map",
+                                                                   package="src.{0}".format(project_name))
                     self.current_project_name = project_name
 
                     self.header()
@@ -111,11 +119,13 @@ class CommandInterpreter:
 
                 project = int(input("{0}-{1}> ".format(0, len(directories) - 1)))
 
-                self.current_project = importlib.import_module(".schema_map", package="src.{0}".format(directories[project]))
+                self.current_project = importlib.import_module(".schema_map",
+                                                               package="src.{0}".format(directories[project]))
                 self.current_project_name = directories[project]
             else:
                 for x in range(len(directories)):
-                    self.current_project = importlib.import_module(".schema_map", package="src.{0}".format(directories[x]))
+                    self.current_project = importlib.import_module(".schema_map",
+                                                                   package="src.{0}".format(directories[x]))
                     self.current_project_name = directories[x]
 
             self.header()
@@ -134,25 +144,22 @@ class CommandInterpreter:
 
             # iterate over the plugins and load them into the PluginRegistry
             for plugin in plugin_directory:
-                temp_plugin = importlib.import_module(".PythonCompiler", package="plugins".format(plugin))
-                #temp_plugin.__package__
-                test = pyclbr.readmodule_ex("plugins.PythonCompiler").
+                if not plugin == "__init__.py":
+                    plugin_module = importlib.import_module("plugins.{0}".format(plugin.replace(".py", "")), ".")
+                    temp_plugin = plugin_module.Plugin()
 
-                print(test)
-                #print(inspect.getmembers(sys.modules[temp_plugin.__module__], inspect.isclass))
-#                print(temp_plugin.PythonCompiler.get_sublcass_name())
-                #self.plugin_registry.register_plugin(temp_plugin)
+            # show a table (thanks prettytable) of all plugins
+            plugin_table = PrettyTable()
+            plugin_table.field_names = ["Name", "Version", "Author", "Description"]
 
-            '''if not len(directories) == 1:
-                print("select project to open")
-                for x in range(len(directories)):
-                    print("{0}) {1}".format(x, directories[x]))
+            for plugin in SQLFusionPlugin.plugin_registry.get_plugins():
+                plugin_table.add_row([plugin.plugin_configuration.plugin_name,
+                                      plugin.plugin_configuration.plugin_version,
+                                      plugin.plugin_configuration.author,
+                                      plugin.plugin_configuration.plugin_short_description])
 
-                project = int(input("{0}-{1}> ".format(0, len(directories) - 1)))
+            print(plugin_table)
 
-                self.current_project = importlib.import_module(".schema_map",
-                                                               package="src.{0}".format(directories[project]))
-                self.current_project_name = directories[project]'''
         else:
             print("unknown command, type help for a list of commands.")
         self.get_input()
@@ -165,6 +172,3 @@ class CommandInterpreter:
             return True
         else:
             return False
-
-
-

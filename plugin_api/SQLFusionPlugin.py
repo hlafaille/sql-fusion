@@ -9,17 +9,34 @@ The API works as follows:
 - plugins are event driven
 """
 from plugin_api.PluginConfiguration import PluginConfiguration
-from plugin_api.PluginRegistry import PluginRegistry
+from plugin_api.PluginRegistry import PluginRegistry, SQLFusionCommand
+
+plugin_registry = PluginRegistry()
 
 
 class SQLFusionPlugin:
     plugin_configuration = PluginConfiguration()
 
-    def __init__(self, plugin_registry: PluginRegistry):
-        # register ourselves with the plugin registry. will be used as primary communication between CLI and plugins
-        plugin_registry.register_plugin(self)
+    def __init__(self):
+        plugin_registry.register_plugin(plugin=self)
 
-    # used for loading into the plugin registry, finding out which classes are plugins and which arent
-    @classmethod
-    def get_subclass_name(cls):
-        return cls.__name__
+    def set_plugin_configuration(self, configuration: PluginConfiguration):
+        self.plugin_configuration = configuration
+
+    def register_command(self, command, function, description):
+        plugin_registry.register_command(SQLFusionCommand(command=command,
+                                                          plugin=self,
+                                                          function=function,
+                                                          description=description))
+
+    def log_common(self, message):
+        print(f"[.] {message}")
+
+    def log_success(self, message):
+        print(f"[*] {message}")
+
+    def log_question(self, message):
+        print(f"[?] {message}")
+
+    def log_critical(self, message):
+        print(f"[!] {message}")
