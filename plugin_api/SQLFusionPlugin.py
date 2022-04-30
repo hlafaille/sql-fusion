@@ -8,6 +8,8 @@ The API works as follows:
 - on CLI initialization, all plugins are loaded, tested, etc.
 - plugins are event driven
 """
+import os.path
+
 from colorama import Fore
 
 from plugin_api.PluginConfiguration import PluginConfiguration
@@ -21,6 +23,19 @@ class SQLFusionPlugin:
 
     def __init__(self):
         plugin_registry.register_plugin(plugin=self)
+        self.configuration = ""
+
+        # execution
+        self.open_configuration()
+
+    # opens the configuration file, reads it
+    def open_configuration(self):
+        # if the file exists, read it. if not create it.
+        try:
+            with open(os.path.join("plugins", "config", "{0}.json").format(self.plugin_configuration.plugin_name)) as f:
+                self.configuration = f.read()
+        except FileNotFoundError:
+            pass
 
     def set_plugin_configuration(self, configuration: PluginConfiguration):
         self.plugin_configuration = configuration
