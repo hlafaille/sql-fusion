@@ -14,24 +14,25 @@ class Plugin(SQLFusionPlugin):
     # Overwrite init dunder function (we must take plugin_registry as an arg!)
     def __init__(self):
         # set our plugin configuration
-        self.set_plugin_configuration(PluginConfiguration(plugin_name="Help",
+        self.set_plugin_configuration(PluginConfiguration(plugin_name="Plugins",
                                                           plugin_version="0.1.0",
-                                                          plugin_short_description="Simply displays a help table",
+                                                          plugin_short_description="Displays all loaded plugins",
                                                           author="hlafaille"))
 
         # we can now call super to register ourselves with the plugin registry
         super(Plugin, self).__init__()
 
         # register some commands
-        self.register_command("help", self.show_help, "Simply displays a help table")
+        self.register_command("plugins", self.show_plugins, "Displays all loaded plugins")
 
-    def show_help(self, args):
-        # show a table (thanks prettytable) of all commands
-        command_table = PrettyTable()
-        command_table.field_names = ["Command", "Plugin", "Description"]
+    def show_plugins(self, args):
+        # show a table (thanks prettytable) of all plugins
+        plugin_table = PrettyTable()
+        plugin_table.field_names = ["Name", "Version", "Author", "Description"]
 
-        for command in plugin_registry.get_commands():
-            command_table.add_row(
-                [command.command, command.plugin.plugin_configuration.plugin_name, command.description])
-
-        self.log(command_table)
+        for plugin in plugin_registry.get_plugins():
+            plugin_table.add_row([plugin.plugin_configuration.plugin_name,
+                                  plugin.plugin_configuration.plugin_version,
+                                  plugin.plugin_configuration.author,
+                                  plugin.plugin_configuration.plugin_short_description])
+        self.log(plugin_table)

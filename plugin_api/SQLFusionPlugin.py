@@ -8,6 +8,8 @@ The API works as follows:
 - on CLI initialization, all plugins are loaded, tested, etc.
 - plugins are event driven
 """
+from colorama import Fore
+
 from plugin_api.PluginConfiguration import PluginConfiguration
 from plugin_api.PluginRegistry import PluginRegistry, SQLFusionCommand
 
@@ -28,15 +30,22 @@ class SQLFusionPlugin:
                                                           plugin=self,
                                                           function=function,
                                                           description=description))
+    def log(self, message):
+        print_string = Fore.LIGHTWHITE_EX + "{0}".format(message) + Fore.RESET
+        print(print_string)
 
     def log_common(self, message):
-        print(f"[.] {message}")
+        print_string = Fore.LIGHTWHITE_EX + "[*] {0}".format(message) + Fore.RESET
+        print(print_string)
 
     def log_success(self, message):
-        print(f"[*] {message}")
+        print_string = Fore.LIGHTGREEN_EX + "[*] " + Fore.LIGHTWHITE_EX + "{0}".format(message) + Fore.RESET
+        print(print_string)
 
     def log_question(self, message):
-        print(f"[?] {message}")
+        print_string = Fore.LIGHTYELLOW_EX + "[*] " + Fore.LIGHTWHITE_EX + "{0}".format(message) + Fore.RESET
+        print(print_string)
 
     def log_critical(self, message):
-        print(f"[!] {message}")
+        print_string = Fore.LIGHTRED_EX + "[*] " + Fore.LIGHTWHITE_EX + "{0}".format(message) + Fore.RESET
+        print(print_string)
