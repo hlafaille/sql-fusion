@@ -4,7 +4,7 @@ This file provides a handy API for exporting your RootSchemaMap to a correspondi
 
 
 import os.path
-from plugin_api.SQLFusionPlugin import plugin_registry
+#from plugin_api.SQLFusionPlugin import plugin_registry
 
 
 class FileManagement:
