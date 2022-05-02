@@ -45,4 +45,4 @@ class SchemaAlias:
     def __init__(self, database_name, pretty_name, datatype):
         self.pretty_name = pretty_name
         self.database_name = database_name
-        self.datatype = datatype
+        self.datatype = datatype.__name__

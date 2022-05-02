@@ -12,9 +12,11 @@ from json import JSONDecodeError
 
 from colorama import Fore
 
-from plugin_api.CompilerAPI import FileManagement
+from exceptions import CompiledFileNotFoundException
+from objects.SchemaMap import RootSchemaMap
 from plugin_api.PluginConfiguration import PluginConfiguration
 from plugin_api.PluginRegistry import PluginRegistry, SQLFusionCommand
+from plugin_api.CompilerAPI import FileManagement
 
 plugin_registry = PluginRegistry()
 
@@ -25,17 +27,31 @@ class SQLFusionPlugin:
     def __init__(self):
         plugin_registry.register_plugin(plugin=self)
         self.config_file = {}
-        self.compiled_file = None
+        self.compiled_files = []
 
         # execution
         self.open_configuration()
 
-    # setup plugin compiled file
-    def setup_compiled_file(self, shebang=None, extension=None):
-        self.compiled_file = FileManagement(shebang=shebang, extension=extension)
+    # adds a compile file to keep track of
+    def add_compiled_file(self, file: FileManagement):
+        # todo duplication check
+        self.log("Adding independent dataclass '{0}'".format(file.file_name))
+        self.compiled_files.append(file)
+
+    # returns a compiled file (must pass name)
+    def get_compiled_file(self, name: str) -> FileManagement:
+        for file in self.compiled_files:
+            if file.file_name == name:
+                return file
+            else:
+                raise CompiledFileNotFoundException(name)
+
+    # gets all compiled files
+    def get_all_compiled_files(self):
+        return self.compiled_files
 
     # returns the current root schema map
-    def get_root_schema_map(self):
+    def get_root_schema_map(self) -> RootSchemaMap:
         return plugin_registry.current_project
 
     # opens the configuration file, reads it
