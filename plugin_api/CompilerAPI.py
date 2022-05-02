@@ -20,9 +20,13 @@ class FileManagement:
             temp = ""
             for x in range(indent):
                 temp += "    "
-                self.lines += temp + line + "\n"
+                self.lines.append(temp + line + "\n")
         else:
-            self.lines += line + "\n"
+            self.lines.append(line + "\n")
+
+    # used for imports, appends to top of file
+    def add_top_line(self, line=""):
+        self.lines.insert(3, line + "\n")
 
     def add_new_line(self, count=0):
         if count > 0:

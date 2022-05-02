@@ -43,8 +43,8 @@ class SQLFusionPlugin:
         for file in self.compiled_files:
             if file.file_name == name:
                 return file
-            else:
-                raise CompiledFileNotFoundException(name)
+        else:
+            raise CompiledFileNotFoundException(name)
 
     # gets all compiled files
     def get_all_compiled_files(self):

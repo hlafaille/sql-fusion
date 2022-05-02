@@ -7,6 +7,6 @@ If the name of your column is 'status', this object name argument should be the 
 
 
 class Column:
-    def __init__(self, name, python_datatype):
+    def __init__(self, name, datatype):
         self.name = name
-        self.python_datatype = python_datatype.__name__
+        self.datatype = datatype

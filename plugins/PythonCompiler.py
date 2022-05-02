@@ -38,23 +38,30 @@ class Plugin(SQLFusionPlugin):
                 self.log_warning("Compile file '{0}' not found! Creating...".format(e))
                 self.add_compiled_file(FileManagement(plugin_registry, master, extension="py"))
                 object_file = self.get_compiled_file(master)
+                object_file.add_line("from dataclasses import dataclass")
+                object_file.add_new_line(count=2)
+                object_file.add_line("@dataclass")
+                object_file.add_line("class {0}:".format(master))
 
             # if passed object was a Column
             if type(object) == Column:
                 if master:
                     self.log("Found Column '{0}' from {1}.".format(object.name, master))
-                    object_file.add_line("{0}: {1}".format(object.name, object.datatype))
+                    object_file.add_line("{0}: {1}".format(object.name, object.datatype.__name__), indent=1)
 
             # if passed object was a SchemaAlias
             elif type(object) == SchemaAlias:
                 if master:
                     self.log("Found SchemaAlias '{0}:{1}' from {2}.".format(object.database_name, object.pretty_name, master))
-                    #object_file.add_line("{0}: {1}".format(object.pretty_name, object.datatype.__name__), indent=1)
+                    object_file.add_line("{0}: {1}".format(object.pretty_name, object.datatype.__name__), indent=1)
 
             # if passed object was a SchemaMap
             elif type(object) == SchemaMap:
-                # create a compiled file (all schema maps/root schema maps should be their own dataclass / file)
-                #self.add_compiled_file(FileManagement(plugin_registry, object.group_name, extension="py"))
+                # add class import
+                object_file.add_top_line("from {0} import {0}".format(object.group_name))
+                # add class parameter
+                object_file.add_line("{0}: {1}".format(object.group_name.lower(), object.group_name), indent=1)
+
 
                 # recursively call compile()
                 self.log("Found SchemaMap '{0}' from '{1}', entering recursively.".format(object.group_name, master))
