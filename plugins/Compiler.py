@@ -1,5 +1,5 @@
 """
-This plugin ships with sql-fusion and provides Python dataclass functionality.
+This plugin ships with sql-fusion and exposes 'compile' command.
 If you wish to write your own plugin, the pre-provided plugins are excessively commented for your convenience.
 """
 from prettytable import PrettyTable

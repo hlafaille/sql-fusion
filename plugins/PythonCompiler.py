@@ -12,10 +12,28 @@ from plugin_api.CompilerAPI import FileManagement
 from plugin_api.PluginConfiguration import PluginConfiguration
 from plugin_api.SQLFusionPlugin import SQLFusionPlugin, plugin_registry
 
+"""
+Stores a list of symbols, used for duplicate detection. For example, if you specify multiple addresses
+that share the same structure the compiler will overwrite the 'Address' dataclass repeatedly until the
+last time it's referenced.
+"""
+class SymbolDefinition:
+    def __init__(self, name, symbols=None):
+        self.name = name
 
-# Subclass of SQLFusionPlugin, this makes the sql-fusion CLI recognize our plugin
+        if symbols:
+            self.symbols = symbols
+        else:
+            self.symbols = []
+
+    def add_symbol(self, symbol_name, symbol_datatype: type):
+        self.symbols.append({symbol_name: symbol_datatype})
+
+"""
+Subclass of SQLFusionPlugin, this makes the sql-fusion CLI recognize our plugin
+"""
+
 class Plugin(SQLFusionPlugin):
-
     # Overwrite init dunder function (we must take plugin_registry as an arg!)
     def __init__(self):
         # set our plugin configuration
@@ -26,6 +44,23 @@ class Plugin(SQLFusionPlugin):
 
         # we can now call super to register ourselves with the plugin registry
         super(Plugin, self).__init__()
+
+        # Register variables
+        self.symbols = []
+
+    # define a symbol for duplicate file detection
+    def define_symbol(self, symbol_definition: SymbolDefinition):
+        # check if this symbol already exists
+        for symbol in self.symbols:
+            if not symbol.name == symbol_definition.name:
+                self.symbols.append(symbol_definition)
+                self.log("Defined symbol '{0}'".format(symbol_definition.name))
+            else:
+                self.log_warning("Symbol '{0}' defined previously, skipping new definition".format(symbol_definition.name))
+                break
+        else:
+            self.log("Defining first symbol '{0}'".format(symbol_definition.name))
+            self.symbols.append(symbol_definition)
 
     # since this is a compiler only plugin, we just define compile() and sql-fusion takes care of the rest
     def compile(self, object=None, master=None):
@@ -57,11 +92,15 @@ class Plugin(SQLFusionPlugin):
 
             # if passed object was a SchemaMap
             elif type(object) == SchemaMap:
+                symbol_definition = SymbolDefinition(object.group_name.lower())
+                symbol_definition.add_symbol(object.group_name.lower(), SchemaMap)
+                self.define_symbol(symbol_definition)
+
                 # add class import
                 object_file.add_top_line("from {0} import {0}".format(object.group_name))
+
                 # add class parameter
                 object_file.add_line("{0}: {1}".format(object.group_name.lower(), object.group_name), indent=1)
-
 
                 # recursively call compile()
                 self.log("Found SchemaMap '{0}' from '{1}', entering recursively.".format(object.group_name, master))
@@ -77,6 +116,10 @@ class Plugin(SQLFusionPlugin):
         # if an object wasn't passed (assuming the Compiler plugin is calling this function)
         else:
             self.log("Compiling '{0}'".format(plugin_registry.project_name))
+
+            # if there was a table specified in the RootSchemaMap
+            if self.get_root_schema_map().table:
+                self.log("RootSchemaMap specified '{0}' as it's '..FROM..' table".format(self.get_root_schema_map().table))
 
             # create the top most level dataclass
             self.add_compiled_file(FileManagement(plugin_registry, self.get_root_schema_map().root_name, extension="py"))

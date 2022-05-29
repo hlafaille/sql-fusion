@@ -66,8 +66,11 @@ class SchemaMap:
 
 
 class RootSchemaMap:
-    def __init__(self, columns, root_name):
+    def __init__(self, columns, root_name, table=None):
         self.root_name = root_name
+
+        # Optional arg, used on SQL generation as "...FROM table..."
+        self.table = table
 
         # where we actually store the SchemaMaps
         self.columns = []
